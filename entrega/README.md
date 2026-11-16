@@ -14,7 +14,22 @@
 | Programming language | Python 3.15.1 (any Python 3.8 or newer works) |
 | Libraries | Only the Python standard library (`argparse`, `collections`, `dataclasses`, `itertools`, `subprocess`, `unittest`). No parser generators or parsing libraries. |
 
-There is nothing to build or install: the programs are run directly with Python.
+There is nothing to build or install: the programs are run directly with Python. They were tested with Python 3.9, 3.11, 3.12, 3.14 and 3.15.
+
+### Running on Windows
+
+- Use `py` (or `python`) instead of `python3` in every command below.
+- Input redirection with `<` works in the Command Prompt (`cmd`), but not in PowerShell. In PowerShell, use one of these two forms instead:
+
+  ```powershell
+  Get-Content tests\inputs\example1.txt | py main.py
+  ```
+
+  ```powershell
+  cmd /c "py main.py < tests\inputs\example1.txt"
+  ```
+
+- Output is always written in UTF-8, so characters such as `ε` print correctly even when the output is redirected to a file.
 
 ## Project structure
 

@@ -1,0 +1,7 @@
+# Archivos que Python genera al ejecutar el código
+__pycache__/
+*.pyc
+
+# Archivos del sistema (macOS y Windows)
+.DS_Store
+Thumbs.db

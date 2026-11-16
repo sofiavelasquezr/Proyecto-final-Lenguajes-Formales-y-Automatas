@@ -28,7 +28,7 @@ from parsing.parse_tree import format_tree
 from sdd.evaluator import (CircularSDDError, SDDError, classify_sdd, evaluate,
                            validate_sdd)
 from sdd.nested_list_sdd import GRAMMAR_TEXT, build_circular_sdd, build_sdd
-from main import make_line_reader, string_to_tokens
+from main import make_line_reader, string_to_tokens, use_utf8_output
 
 
 def print_rules(grammar, sdd):
@@ -71,6 +71,7 @@ def main(argv=None):
     arg_parser.add_argument("--graph", action="store_true")
     arg_parser.add_argument("--circular", action="store_true")
     args = arg_parser.parse_args(argv)
+    use_utf8_output()
 
     grammar = grammar_from_text(GRAMMAR_TEXT)
     sdd = build_circular_sdd() if args.circular else build_sdd()

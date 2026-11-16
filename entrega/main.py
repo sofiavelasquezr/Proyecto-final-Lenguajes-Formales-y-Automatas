@@ -26,6 +26,17 @@ from parsing.slr1 import SLR1Parser
 PROMPT = "Select a parser (T: for LL(1), B: for SLR(1), Q: quit):"
 
 
+def use_utf8_output():
+    """
+    Fuerza UTF-8 en la salida. En Windows, cuando la salida se redirige a un
+    archivo o a otro programa, Python usa por defecto cp1252, que no tiene
+    caracteres como 'ε' y haría fallar el programa al imprimir el árbol.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
+
+
 def make_line_reader(stream):
     """Devuelve una función que lee una línea (sin el salto) o None al final."""
     def read_line():
@@ -97,6 +108,7 @@ def main(argv=None):
                             help="print the LR(0) automaton and the SLR(1) table")
     arg_parser.add_argument("--trace", action="store_true", help="print every parse step by step")
     args = arg_parser.parse_args(argv)
+    use_utf8_output()
 
     read_line = make_line_reader(sys.stdin)
     try:

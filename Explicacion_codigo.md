@@ -4,7 +4,7 @@ Este documento explica, archivo por archivo y función por función, el código 
 
 La teoría de cada algoritmo está en la [guía teórica](Guia_teorica_proyecto.md). Aquí se explica **cómo** se tradujo esa teoría a Python.
 
-> **Convención.** Cuando se dice "línea N" se refiere al número de línea del archivo. Los enlaces del tipo [`ll1.py:91`](entrega/parsing/ll1.py:91) abren el archivo en esa línea.
+> **Convención.** Cuando se dice "línea N" se refiere al número de línea del archivo. Los enlaces del tipo [`ll1.py#L91`](entrega/parsing/ll1.py#L91) abren el archivo en esa línea cuando se ve en GitHub.
 
 ---
 
@@ -32,13 +32,34 @@ La teoría de cada algoritmo está en la [guía teórica](Guia_teorica_proyecto.
 
 ### 1.1 Requisitos
 
-- **Python 3.8 o más reciente.** En tu Mac está instalado Python 3.15.1; para comprobarlo, ejecuta `python3 --version`.
+- **Python 3.8 o más reciente**, en macOS, Windows o Linux. Se probó con Python 3.9, 3.11, 3.12, 3.14 y 3.15.
 - No hay que instalar nada más: solo se usa la biblioteca estándar de Python.
-- **Todos los comandos se ejecutan dentro de la carpeta `entrega`:**
+- **Todos los comandos se ejecutan dentro de la carpeta `entrega` del repositorio** (cambia la ruta por la de tu computador):
 
 ```bash
-cd "/Users/sofiavelasquez/Documents/SEMESTRE 8/AUTÓMATAS/Proyecto/entrega"
+cd ruta/al/repositorio/entrega
 ```
+
+**El nombre del comando de Python depende del sistema:**
+
+| Sistema | Comando | Cómo comprobar la versión |
+|---|---|---|
+| macOS / Linux | `python3` | `python3 --version` |
+| Windows | `py` (o `python`) | `py --version` |
+
+En Windows, en todos los comandos de este documento, cambia `python3` por `py`. Si `py` no existe, instala Python desde [python.org](https://www.python.org/downloads/) y marca la casilla **"Add python.exe to PATH"**.
+
+**Redirección de archivos en Windows.** Los comandos con `<` (por ejemplo `python3 main.py < tests/inputs/example1.txt`) funcionan en **macOS, Linux y en el "Símbolo del sistema" (cmd)** de Windows. **PowerShell no admite `<`**. En PowerShell, usa una de estas dos formas:
+
+```powershell
+Get-Content tests\inputs\example1.txt | py main.py
+```
+
+```powershell
+cmd /c "py main.py < tests\inputs\example1.txt"
+```
+
+Si escribes la entrada a mano (`py main.py` y luego escribes), funciona igual en cualquier terminal.
 
 ### 1.2 Ítems 1 y 2: `main.py`
 
@@ -162,10 +183,18 @@ Cómo leer la salida:
 python3 -m unittest discover -s tests -v
 ```
 
-Deben salir **21 pruebas con `OK`**. Antes de entregar, borra las carpetas `__pycache__` que crea Python, porque el enunciado pide no incluir archivos compilados:
+Deben salir **21 pruebas con `OK`**. Antes de entregar, borra las carpetas `__pycache__` que crea Python, porque el enunciado pide no incluir archivos compilados. Al repositorio de GitHub no se suben, porque el archivo `.gitignore` las excluye.
+
+En macOS / Linux:
 
 ```bash
 find . -name __pycache__ -exec rm -rf {} +
+```
+
+En Windows (PowerShell):
+
+```powershell
+Get-ChildItem -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force
 ```
 
 ---
@@ -756,7 +785,17 @@ Detalles importantes:
 
 [Abrir archivo](entrega/main.py).
 
-### 9.1 `make_line_reader(stream)` (línea 29)
+### 9.0 `use_utf8_output()` (línea 29)
+
+```python
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8")
+```
+
+En Windows, cuando la salida se redirige (a un archivo con `>`, o a otro programa), Python usa por defecto la codificación `cp1252`. Esa codificación no tiene el carácter `ε`, así que el programa fallaría con `UnicodeEncodeError` al imprimir el árbol del ítem 3. Esta función obliga a escribir siempre en UTF-8. La llaman `main()` en `main.py` y en `sdd_main.py`. En macOS y Linux no cambia nada, porque ya usan UTF-8.
+
+### 9.1 `make_line_reader(stream)` (línea 40)
 
 ```python
 def read_line():
@@ -769,17 +808,17 @@ def read_line():
 - `readline()` devuelve `""` **solo** al final del archivo. Una línea vacía de verdad llega como `"\n"`, que después de `rstrip` queda `""`. Así se distinguen "se acabó la entrada" (`None`) y "línea vacía" (`""`), que en el enunciado significa "fin de las cadenas".
 - Se lee **línea por línea**, no todo de una vez. Así el programa funciona de forma interactiva: puede mostrar el menú y esperar la respuesta.
 
-### 9.2 `string_to_tokens(line)` (línea 39)
+### 9.2 `string_to_tokens(line)` (línea 50)
 
 `"e"` es la cadena vacía (`[]`) y cualquier otra se separa en caracteres. El enunciado dice "the empty string is given as a line containing only e". El `$` lo agrega cada parser, porque "The strings that your program receives do not include it: your program must append it".
 
-### 9.3 `parse_strings(parser, read_line, show_trace)` (línea 44)
+### 9.3 `parse_strings(parser, read_line, show_trace)` (línea 55)
 
 Bucle: lee una línea; si es `None` (EOF) o vacía, termina. Si no, la analiza e imprime `yes` si `parse` devolvió un árbol y `no` si devolvió `None`. Con `--trace`, imprime antes la tabla de pasos.
 
-### 9.4 `main()` (líneas 92–143)
+### 9.4 `main()` (líneas 103–155)
 
-1. **Opciones** con `argparse`: `--sets`, `--table`, `--automaton` y `--trace`. Son `store_true`, es decir, `True` si aparecen.
+1. **Opciones** con `argparse`: `--sets`, `--table`, `--automaton` y `--trace`. Son `store_true`, es decir, `True` si aparecen. Luego se llama a `use_utf8_output()`.
 2. **Lectura de la gramática.** Si hay un error de formato, se imprime en `stderr` y se termina con código 1.
 3. **Ítem 1:** `compute_first` y `compute_follow`. Con `--sets` se imprimen.
 4. **Ítem 2:** se construyen **los dos** parsers, porque hay que saber si la gramática es LL(1) **y** si es SLR(1).

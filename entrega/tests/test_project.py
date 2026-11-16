@@ -26,10 +26,10 @@ from sdd.nested_list_sdd import GRAMMAR_TEXT, build_sdd, build_circular_sdd  # n
 
 def run_program(script, input_file, *args):
     """Ejecuta un programa del proyecto con un archivo como entrada estándar."""
-    with open(os.path.join(INPUTS, input_file)) as stdin:
+    with open(os.path.join(INPUTS, input_file), encoding="utf-8") as stdin:
         result = subprocess.run([sys.executable, os.path.join(ROOT, script), *args],
-                                stdin=stdin, capture_output=True, text=True, cwd=ROOT,
-                                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+                                stdin=stdin, capture_output=True, text=True, encoding="utf-8",
+                                cwd=ROOT, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
     return result.stdout
 
 
