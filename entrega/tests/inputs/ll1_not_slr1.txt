@@ -1,0 +1,8 @@
+3
+S -> AaAb BbBa
+A -> e
+B -> e
+ab
+ba
+aa
+
